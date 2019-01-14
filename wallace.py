@@ -1,5 +1,6 @@
 import pandas as pd
 from nltk.stem import WordNetLemmatizer
+from nltk.stem.snowball import EnglishStemmer
 
 def rawWordCount(document):
     ''' Calculate the raw word count for document, which should be an iterable which returns strings on each iteration (such as a file)'''
@@ -32,3 +33,24 @@ def getLemma(*words):
     for word in words:
         out.append(wnl.lemmatize(word))
     return out
+
+def getStem(*words):
+    '''Return a list of the stems corresponding to the words provided as arguments'''
+    stemmer=EnglishStemmer()
+    out=list()
+    for word in words:
+        out.append(stemmer.stem(word))
+    return out
+
+def getStemCount(document):
+    ''' Calculate the word count for document, which should be an iterable which returns strings on each iteration (such as a file), and aggregate the results by word stem. Returns a tuple where the first member is a dataframe containing the count per stem and the second member is a dictionary with the keys corresponding to stems and the values are lists of words corresponding to that stem'''
+    counts=rawWordCount(document)
+    counts.loc[:,'stem']=getStem(*counts.word)
+    grouped=counts.groupby('stem')
+    stemDict=dict()
+    for stem in set(counts.stem):
+        #make list of words corresponding to each stem
+        stemDict[stem]=list(counts.loc[counts.loc[:,'stem']==stem,'word'])
+    #Sum up total count for each stem
+    agg=counts.loc[:,('stem','count')].groupby('stem').aggregate(sum)
+    return agg,stemDict
