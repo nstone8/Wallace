@@ -24,6 +24,7 @@ def rawWordCount(document):
     keys=[k for k,v in countItems]
     values=[v for k,v in countItems]
     countFrame=pd.DataFrame(dict(word=keys,count=values))
+    countFrame=countFrame.sort_values('count',ascending=False).reset_index(drop=True)
     return countFrame
 
 def getLemma(*words):
@@ -42,7 +43,7 @@ def getStem(*words):
         out.append(stemmer.stem(word))
     return out
 
-def getStemCount(document):
+def stemCount(document):
     ''' Calculate the word count for document, which should be an iterable which returns strings on each iteration (such as a file), and aggregate the results by word stem. Returns a tuple where the first member is a dataframe containing the count per stem and the second member is a dictionary with the keys corresponding to stems and the values are lists of words corresponding to that stem'''
     counts=rawWordCount(document)
     counts.loc[:,'stem']=getStem(*counts.word)
@@ -52,5 +53,5 @@ def getStemCount(document):
         #make list of words corresponding to each stem
         stemDict[stem]=list(counts.loc[counts.loc[:,'stem']==stem,'word'])
     #Sum up total count for each stem
-    agg=counts.loc[:,('stem','count')].groupby('stem').aggregate(sum)
+    agg=counts.loc[:,('stem','count')].groupby('stem').aggregate(sum).sort_values('count',ascending=False)
     return agg,stemDict
