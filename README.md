@@ -1,5 +1,5 @@
 # Wallace
-Simple text analysis in python
+Simple text analysis in Python
 
 Uses NLTK and WordNet
 
